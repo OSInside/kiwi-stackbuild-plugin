@@ -16,7 +16,6 @@
 # along with kiwi.  If not, see <http://www.gnu.org/licenses/>
 #
 from lxml import etree
-import copy
 import os
 import glob
 
@@ -27,18 +26,28 @@ from kiwi.exceptions import (
     KiwiConfigFileNotFound
 )
 
+
 class XMLMerge:
 
-    def __init__(self, description_dir: str, derived_from_dir: str):
+    def __init__(self, description_dir: str):
         self.description = self._find_description_file(description_dir)
-        self.derived_from = self._find_description_file(derived_from_dir)
         self.description_dir = description_dir
-        self.derived_from_dir = derived_from_dir
         self.description_tree = etree.parse(self.description)
-        self.derived_from_tree = etree.parse(self.derived_from)
 
-    def merge_description(self):
-        work_tree = copy.deepcopy(self.derived_from_tree)
+        # description = etree.parse(self.description)
+        # validation_rng = relaxng.validate(description)
+
+        # if not validation_rng or not validation_schematron:
+        #    raise Exception('Failed to validate schema')
+
+    def get_derived_from(self):
+        # TODO run validation to check if derived
+        img = self.description_tree.getroot()
+        return img.attrib.get('derived_from')
+
+    def merge_description(self, derived_from_dir):
+        derived_from = self._find_description_file(derived_from_dir)
+        work_tree = etree.parse(derived_from)
 
         self._image_merge(work_tree)
         self._description_replace(work_tree)
@@ -46,15 +55,15 @@ class XMLMerge:
         self._profiles_merge(work_tree)
         self._users_merge(work_tree)
         self._drop_in_sections(work_tree)
-        
-        sync = DataSync(f'{self.description_dir}/', self.derived_from_dir)
+
+        sync = DataSync(f'{self.description_dir}/', derived_from_dir)
         sync.sync_data(options=Defaults.get_sync_options())
 
-        work_tree.write(self.derived_from, pretty_print=True)
+        work_tree.write(derived_from, pretty_print=True)
 
     def _description_replace(self, work_tree):
         self._replace_unique_element_by_xpath(
-            work_tree,'/image/description[@type="system"]'
+            work_tree, '/image/description[@type="system"]'
         )
 
     def _drop_in_sections(self, work_tree):
@@ -83,7 +92,7 @@ class XMLMerge:
                 for profile in profiles[0]:
                     name = profile.attrib['name']
                     if not self._replace_unique_element_by_xpath(
-                        work_tree, 
+                        work_tree,
                         f'/image/profiles/profile[@name=\'{name}\']'
                     ):
                         w_profiles[0].append(profile)
@@ -114,7 +123,7 @@ class XMLMerge:
     def _merge_preferences_set(self, pref_setA, pref_setB):
         for child in pref_setA:
             if child.tag == 'showlicense':
-                pret_setB.append(child)
+                pref_setB.append(child)
                 continue
             if child.tag == 'type':
                 b_type = self._element_with_attributes_exists(
@@ -150,9 +159,29 @@ class XMLMerge:
         return config_file
 
     def _image_merge(self, work_tree):
-        # TODO
-        pass
+        img = self.description_tree.getroot()
+        w_root = work_tree.getroot()
+        if 'displayname' in img.attrib:
+            w_root.attrib['displayname'] = img.attrib['displayname']
+        if 'id' in img.attrib:
+            w_root.attrib['id'] = img.attrib['id']
+        if 'name' in img.attrib:
+            w_root.attrib['name'] = img.attrib['name']
 
     def _users_merge(self, work_tree):
-        # TODO
-        pass
+        users = self.description_tree.xpath('/image/users')
+        for users_sec in users:
+            usrs_match = self._element_with_attributes_exists(
+                work_tree, '/image/users', users_sec.attrib
+            )
+            if usrs_match is None:
+                work_tree.getroot().append(users_sec)
+            else:
+                for user in users_sec:
+                    usr_match = self._element_with_attributes_exists(
+                        usrs_match, './user', {'name': user.attrib['name']}
+                    )
+                    if usr_match is None:
+                        usrs_match.append(user)
+                    else:
+                        usrs_match.replace(usr_match, user)

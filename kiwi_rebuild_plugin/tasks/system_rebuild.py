@@ -17,14 +17,8 @@
 #
 """
 usage: kiwi-ng system rebuild -h | --help
-       kiwi-ng system rebuild --root-tree=<image-ref>
-           [--description=<directory>]
-           [--keep-root=<image-ref>]
-           <kiwi_build_command_args>...
-       kiwi-ng system rebuild --description=<directory>
-           [--root-tree=<image-ref>]
-           [--keep-root=<image-ref>]
-           <kiwi_build_command_args>...
+       kiwi-ng system rebuild (--root-tree=<image-ref> |  --description=<directory>)
+           [--keep-root=<image-ref>] -- <kiwi_build_command_args>...
 
 commands:
     rebuild
@@ -73,7 +67,7 @@ class SystemRebuildTask(CliTask):
         super().__init__(should_perform_task_setup)
         self.manual = Help()
         self.temp_desc = self.temp_desc = mkdtemp(prefix='kiwi_description.')
-        self.build_command_args = self._get_build_command_args() 
+        self.build_command_args = self._get_build_command_args()
 
     def process(self):
         if self.build_command_args['help']:
@@ -96,20 +90,15 @@ class SystemRebuildTask(CliTask):
 
         description = self.command_args['--description']
         keep_root = self.command_args['--keep-root']
-        if self.command_args['--root-tree']:
-            Path.wipe(image_root)
-            self.build_command_args['--allow-existing-root'] = True
-            root_tree = RootCacheOCI(image_root)
-            root_tree.import_root(self.command_args['--root-tree'])
-            root_tree.import_description(self.temp_desc)
-            if description:
-                merger = XMLMerge(description, self.temp_desc)
-                merger.merge_description()
-            self.build_command_args['--description'] = self.temp_desc
-        else:
-            self.build_command_args['--description'] = description
-
         if description:
+            merger = XMLMerge(description)
+            derived_from = merger.get_derived_from()
+            if derived_from:
+                self._import_root(derived_from, image_root)
+                merger.merge_description(self.temp_desc)
+            else:
+                self.build_command_args['--description'] = description
+
             with patch.object(
                 sys, 'argv', self.system_prepare_args_list(image_root)
             ):
@@ -117,6 +106,8 @@ class SystemRebuildTask(CliTask):
                     should_perform_task_setup=False
                 )
                 system_prepare.process()
+        else:
+            self._import_root(self.command_args['--root-tree'], image_root)
 
         with patch.object(
             sys, 'argv', self.system_create_args_list(image_root)
@@ -124,21 +115,18 @@ class SystemRebuildTask(CliTask):
             system_create = SystemCreateTask(should_perform_task_setup=False)
             system_create.process()
 
-        if keep_root:
-            log.info('Storing rootfs in an OCI artifact')
-            transport, repo, tag = self.parse_keep_root(keep_root)
-            root_cache = RootCacheOCI(image_root)
-            if repo:
-                repo = f'{repo}/{self.xml_state.xml_data.get_name()}'
-            else:
-                repo = self.xml_state.xml_data.get_name()
-            if not tag:
-                tag = self.xml_state.get_image_version() 
-            root_cache.store_root(
-                transport, repo, tag,
-                self.xml_state.get_description_section().author,
-                abs_target_dir_path
-            )
+            if keep_root:
+                log.info('Storing rootfs in an OCI artifact')
+                transport, repo, tag = self._parse_keep_root(
+                    system_create.xml_state,
+                    keep_root
+                )
+                root_cache = RootCacheOCI(image_root)
+                root_cache.store_root(
+                    transport, repo, tag,
+                    system_create.xml_state.get_description_section().author,
+                    abs_target_dir_path
+                )
 
     def system_prepare_args_list(self, root):
         prepare_args = self.build_command_args.copy()
@@ -190,6 +178,13 @@ class SystemRebuildTask(CliTask):
             argv=kiwi_build_command
         )
 
+    def _import_root(self, derived_from, image_root_dir):
+        Path.wipe(image_root_dir)
+        self.build_command_args['--allow-existing-root'] = True
+        root_tree = RootCacheOCI(image_root_dir)
+        root_tree.import_root(derived_from)
+        root_tree.import_description(self.temp_desc)
+
     def _opts_to_list(self, opts_dict):
         opts_lst = []
         for k, v in opts_dict.items():
@@ -198,23 +193,23 @@ class SystemRebuildTask(CliTask):
             if isinstance(v, bool) and v is True:
                 opts_lst.append(k)
             elif isinstance(v, str):
-                opts_lst.extend([k,v])
+                opts_lst.extend([k, v])
             elif isinstance(v, list) and v:
                 for it in v:
                     opts_lst.extend([k, it])
-            else:
-                continue
         return opts_lst
 
-    def _parse_keep_root(self, keep_root):
+    def _parse_keep_root(self, xml_state, keep_root):
         part = keep_root.partition(':')
         transport = part[0]
-        tag = ''
-        repo = ''
+        tag = xml_state.get_image_version()
+        repo = xml_state.xml_data.get_name()
         if part[2]:
             part = part[2].rpartition(':')
-            tag = part[2]
-            repo = part[0]
+            if part[2]:
+                tag = part[2]
+            if part[0]:
+                repo = f'{part[0]}/{repo}'.lower()
         return (transport, repo, tag)
 
     def __del__(self):

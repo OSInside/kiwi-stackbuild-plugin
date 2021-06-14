@@ -20,7 +20,6 @@ import json
 from kiwi.oci_tools import OCI
 from kiwi.utils.sync import DataSync
 from kiwi.defaults import Defaults
-from kiwi.path import Path
 from kiwi.command import Command
 
 
@@ -32,7 +31,7 @@ class RootCacheOCI:
     """
     def __init__(self, root_dir):
         self.root_dir = root_dir
-        self.metadata = 'Some metadata check'# TODO
+        self.metadata = 'Some metadata check'  # TODO
 
     def store_root(self, transport, repo, tag, maintainer, target_dir):
         filename = ''

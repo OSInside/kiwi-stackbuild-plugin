@@ -16,14 +16,14 @@
 # along with kiwi.  If not, see <http://www.gnu.org/licenses/>
 #
 """
-usage: kiwi-ng system rebuild -h | --help
-       kiwi-ng system rebuild (--root-tree=<image-ref> |  --description=<directory>)
+usage: kiwi-ng system stackbuild -h | --help
+       kiwi-ng system stackbuild (--root-tree=<image-ref> |  --description=<directory>)
            [--keep-root=<image-ref>] -- <kiwi_build_command_args>...
 
 commands:
-    rebuild
+    stackbuild
         build a system image from the specified description and/or from the
-        specified prestored root tree. The rebuild command combines the
+        specified prestored root tree. The stackbuild command combines the
         prepare and create commands. Alternatively, it can also run a regular
         build and and store the root tree for later use.
 
@@ -55,14 +55,14 @@ from kiwi.tasks.base import CliTask
 from kiwi.path import Path
 
 # project
-from kiwi_rebuild_plugin.root_cache import RootCacheOCI
-from kiwi_rebuild_plugin.xml_merge import XMLMerge
+from kiwi_stackbuild_plugin.root_cache import RootCacheOCI
+from kiwi_stackbuild_plugin.xml_merge import XMLMerge
 
 
 log = logging.getLogger('kiwi')
 
 
-class SystemRebuildTask(CliTask):
+class SystemStackbuildTask(CliTask):
     def __init__(self, should_perform_task_setup=True):
         super().__init__(should_perform_task_setup)
         self.manual = Help()

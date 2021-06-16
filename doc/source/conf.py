@@ -100,14 +100,22 @@ html_theme_options = {
 # -- Options for manual page output ---------------------------------------
 
 # The man page toctree documents.
-image_obs_doc = 'commands/system_stackbuild'
+system_stackbuild_doc = 'commands/system_stackbuild'
+system_stash_doc = 'commands/system_stash'
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
     (
-        image_obs_doc,
+        system_stackbuild_doc,
         'kiwi::system::stackbuild',
+        'Stack Build Plugin',
+        [author],
+        8
+    ),
+    (
+        system_stash_doc,
+        'kiwi::system::stash',
         'Stack Build Plugin',
         [author],
         8

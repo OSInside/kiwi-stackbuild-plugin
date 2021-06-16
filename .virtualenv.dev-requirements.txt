@@ -35,3 +35,4 @@ twine
 
 # static type checking
 mypy
+types-mock

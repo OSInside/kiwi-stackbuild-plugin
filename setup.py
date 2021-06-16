@@ -26,7 +26,8 @@ config = {
     'packages': ['kiwi_stackbuild_plugin'],
     'entry_points': {
         'kiwi.tasks': [
-            'system_stackbuild=kiwi_stackbuild_plugin.tasks.system_stackbuild'
+            'system_stackbuild=kiwi_stackbuild_plugin.tasks.system_stackbuild',
+            'system_stash=kiwi_stackbuild_plugin.tasks.system_stash'
         ]
     },
     'include_package_data': True,

@@ -6,9 +6,13 @@ SYNOPSIS
 
 .. code:: bash
 
-   kiwi-ng [global options] service <command> [<args>]
-
    kiwi-ng system stackbuild -h | --help
+   kiwi-ng system stackbuild --stash=<name> --description=<directory> --target-dir=<directory>
+       [--from-registry=<URI>]
+       [-- <kiwi_build_command_args>...]
+   kiwi-ng system stackbuild --stash=<name> --target-dir=<directory>
+       [--from-registry=<URI>]
+       [-- <kiwi_create_command_args>...]
    kiwi-ng system stackbuild help
 
 DESCRIPTION
@@ -19,50 +23,77 @@ and reuse KIWI built root-trees as OCI containers. The idea is using OCI images
 as portable format to store and distribute a root-tree, so they can be pushed
 and pulled from OCI registries.
 
-This plugin allows the user to:
+This plugin allows the user to operate in two modes
 
-* Build a regular image and, in addition, store the root-tree (the result
-  of prepare step) in to an OCI image. Note that the stored OCI image includes
-  full KIWI description.
+1. Rebuild an image from a stash
 
-  .. code:: bash
+   In this mode `stackbuild` takes a stash, makes it available to the
+   local registry and builds the image using the stash rootfs and
+   in stash stored image description.
 
-     kiwi-ng system rebuild --description <my_project_folder> --keep-root <image_reference> -- --target-dir <my_build_folder>
+   .. code:: bash
 
-* Rebuild a regular image by just pulling a previously stored OCI image,
-  without a KIWI XML description. In that case only the create step is
-  exectued following the pre stored XML description contained in the
-  pulled OCI image.
+      $ kiwi-ng system stackbuild --stash NAME \
+          --target-dir /target/rebuild
 
-  .. code:: bash
 
-     kiwi-ng system rebuild --root <image_reference> -- --target-dir <my_build_folder>
-  
-* Rebuild a regular image by importing a previously stored OCI image and
-  provinfing a custom KIWI XML description. In that case preare and create
-  steps are executed according to the provided XML and ignoring any description
-  artifact from the pulled image.
+2. Build an image based on a stash
 
-  .. code:: bash
+   In this mode `stackbuild` takes a stash, makes it available to the
+   local registry and uses the stash rootfs as the base for an image
+   build of another image description.
 
-     kiwi-ng system rebuild --root <image_reference> -- --description <my_project_folder> --target-dir <my_build_folder>
-  
-* Build a derived image. In that case the user provides an KIWI Rebuild Plugin
-  XML description (based on a slighly different XML schema) that is merged into
-  the KIWI XML description. In that case prepare and create steps are executed
-  based on the pulled root-tree and the merged description.
+   .. code:: bash
 
-  .. code:: bash
+      $ kiwi-ng system stackbuild --stash NAME \
+          --description=/some/image-description --target-dir /target/rebuild
 
-     kiwi-ng system rebuild --description <my_project_folder> -- --target-dir <my_build_folder>
-  
+   .. note::
+
+      The stackbuild plugin does not perform any consistency check
+      if the used stash rootfs is compatible with the provided image
+      description. With that in mind there is nothing which would
+      prevent you from using a Leap stash and try to build a Fedora
+      image on top of it. That an attempt like this will not produce
+      anything useful should be clear to the user and is in the
+      users responsibility to prevent combining apples with pears
 
 OPTIONS
 -------
+
+--stash=<name>
+
+  Name of the stash. See `system stash --list` for available stashes
+
+--from-registry=<URI>
+
+  Pull given stash container name from the provided
+  registry URI
+
+--description=<directory>
+
+  Path to the XML description. This is a directory containing at least
+  one _config.xml_ or _*.kiwi_ XML file.
+
+--target-dir=<directory>
+
+  Path to store the build results.
+
+-- <kiwi_build_command_args>...
+
+  List of command parameters as supported by the kiwi-ng
+  build command. The information given here is passed
+  along to the `kiwi-ng system build` command.
+
+-- <kiwi_create_command_args>...
+
+  List of command parameters as supported by the kiwi-ng
+  build command. The information given here is passed
+  along to the `kiwi-ng system create` command.
 
 EXAMPLE
 -------
 
 .. code:: bash
 
-   TODO
+   $ kiwi-ng system stackbuild --stash NAME --target-dir /target/rebuild

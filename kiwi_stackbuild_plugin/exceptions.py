@@ -1,9 +1,9 @@
-# Copyright (c) 2021 SUSE Linux GmbH.  All rights reserved.
+# Copyright (c) 2020 SUSE Software Solutions Germany GmbH.  All rights reserved.
 #
 # This file is part of kiwi-stackbuild.
 #
 # kiwi-stackbuild is free software: you can redistribute it and/or modify
-# it under the terms owf the GNU General Public License as published by
+# it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
@@ -15,8 +15,16 @@
 # You should have received a copy of the GNU General Public License
 # along with kiwi-stackbuild.  If not, see <http://www.gnu.org/licenses/>
 #
-"""
-Global version information used in kiwi-rebuild-plugin and the package
-"""
-__version__ = '0.0.1'
-__githash__ = '$Format:%H$'
+from kiwi.exceptions import KiwiError
+
+
+class KiwiStackBuildPluginStashNotFoundError(KiwiError):
+    """
+    Exception raised if the stash file does not exist
+    """
+
+
+class KiwiStackBuildPluginTargetDirExists(KiwiError):
+    """
+    Exception raised if the image target directory already exists
+    """

@@ -1,19 +1,19 @@
 # Copyright (c) 2021 SUSE Linux GmbH.  All rights reserved.
 #
-# This file is part of kiwi.
+# This file is part of kiwi-stackbuild.
 #
-# kiwi is free software: you can redistribute it and/or modify
+# kiwi-stackbuild is free software: you can redistribute it and/or modify
 # it under the terms owf the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
-# kiwi is distributed in the hope that it will be useful,
+# kiwi-stackbuild is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with kiwi.  If not, see <http://www.gnu.org/licenses/>
+# along with kiwi-stackbuild.  If not, see <http://www.gnu.org/licenses/>
 #
 """
 usage: kiwi-ng system stash -h | --help
@@ -68,7 +68,6 @@ class SystemStashTask(CliTask):
         )
         contact_info = xml_state.get_description_section()
         stash_target_dir = SystemStashTask._create_stash_target_dir(
-            self.command_args['--root'],
             xml_state.xml_data.get_name()
         )
 
@@ -98,6 +97,7 @@ class SystemStashTask(CliTask):
             StackBuildDefaults.get_stash_exclude_list()
         )
         oci.repack(container_config)
+        oci.set_config(container_config)
         oci.post_process()
         log.info('Exporting stash container')
         oci.export_container_image(
@@ -105,10 +105,9 @@ class SystemStashTask(CliTask):
         )
 
     @staticmethod
-    def _create_stash_target_dir(root_dir: str, image_name: str) -> str:
+    def _create_stash_target_dir(image_name: str) -> str:
         stash_target_dir = os.path.join(
             StackBuildDefaults.get_stash_home(),
-            os.path.abspath(root_dir).replace(os.sep, '_'),
             image_name
         )
         Path.create(stash_target_dir)

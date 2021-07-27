@@ -32,8 +32,8 @@ options:
         the path to the root directory, usually the result of
         a former system prepare or build call
     --tag=<name>
-        the tag name for the container.
-        By default set to: latest
+        the tag name for the container. By default
+        set to the image name of the stash
 """
 import os
 import logging
@@ -74,7 +74,8 @@ class SystemStashTask(CliTask):
         stash_container_file_name = os.path.join(
             stash_target_dir, 'stash.tar'
         )
-        stash_container_tag = self.command_args['--tag'] or 'latest'
+        stash_container_tag = self.command_args['--tag'] or \
+            xml_state.xml_data.get_name()
         container_config = StackBuildDefaults.get_container_config(
             os.path.basename(stash_container_file_name),
             stash_container_tag,

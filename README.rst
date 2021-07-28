@@ -6,6 +6,7 @@ KIWI - Stack Build Plugin
 
 |GitHub CI Action|
 
-KIWI plugin to build images using a container layer as the rootfs
-origin. This allows to build an image on top of a non empty
-image root directory
+This [KIWI](https://osinside.github.io/kiwi/) plugin allows to store
+and reuse KIWI built root-trees as OCI containers. The idea is using OCI images
+as portable format to store and distribute a root-tree, so they can be pushed
+and pulled from OCI registries.

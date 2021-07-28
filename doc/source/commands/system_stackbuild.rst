@@ -18,7 +18,7 @@ SYNOPSIS
 DESCRIPTION
 -----------
 
-This is [KIWI](https://osinside.github.io/kiwi/) plugin that allows to store
+This [KIWI](https://osinside.github.io/kiwi/) plugin allows to store
 and reuse KIWI built root-trees as OCI containers. The idea is using OCI images
 as portable format to store and distribute a root-tree, so they can be pushed
 and pulled from OCI registries.

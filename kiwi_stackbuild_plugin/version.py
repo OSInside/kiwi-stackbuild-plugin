@@ -18,5 +18,5 @@
 """
 Global version information used in kiwi-rebuild-plugin and the package
 """
-__version__ = '0.0.1'
+__version__ = '1.0.0'
 __githash__ = '$Format:%H$'

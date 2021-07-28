@@ -19,6 +19,7 @@
 usage: kiwi-ng system stash -h | --help
        kiwi-ng system stash --root=<directory>
            [--tag=<name>]
+       kiwi-ng system stash --list
        kiwi-ng system stash help
 
 commands:
@@ -34,6 +35,8 @@ options:
     --tag=<name>
         the tag name for the container. By default
         set to the image name of the stash
+    --list
+        list the available stashes
 """
 import os
 import logging
@@ -44,6 +47,7 @@ from kiwi.privileges import Privileges
 from kiwi.xml_description import XMLDescription
 from kiwi.xml_state import XMLState
 from kiwi.oci_tools import OCI
+from kiwi.utils.output import DataOutput
 from kiwi.path import Path
 
 from kiwi_stackbuild_plugin.defaults import StackBuildDefaults
@@ -58,6 +62,16 @@ class SystemStashTask(CliTask):
             return self.manual.show('kiwi::system::stash')
 
         Privileges.check_for_root_permissions()
+
+        if self.command_args.get('--list') is True:
+            stashes = DataOutput(
+                {
+                    StackBuildDefaults.get_stash_home():
+                        os.listdir(StackBuildDefaults.get_stash_home())
+                }
+            )
+            stashes.display()
+            return
 
         log.info('Reading Image description')
         description = XMLDescription(

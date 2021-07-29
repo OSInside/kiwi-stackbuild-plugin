@@ -48,6 +48,7 @@ from kiwi.xml_description import XMLDescription
 from kiwi.xml_state import XMLState
 from kiwi.oci_tools import OCI
 from kiwi.utils.output import DataOutput
+from kiwi.command import Command
 from kiwi.path import Path
 
 from kiwi_stackbuild_plugin.defaults import StackBuildDefaults
@@ -117,6 +118,10 @@ class SystemStashTask(CliTask):
         log.info('Exporting stash container')
         oci.export_container_image(
             stash_container_file_name, 'oci-archive', stash_container_tag
+        )
+        log.info('Importing stash to local registry')
+        Command.run(
+            ['podman', 'load', '-i', stash_container_file_name]
         )
 
     @staticmethod

@@ -81,9 +81,7 @@ from kiwi.path import Path
 from kiwi.utils.sync import DataSync
 from kiwi.defaults import Defaults
 
-from kiwi_stackbuild_plugin.defaults import StackBuildDefaults
 from kiwi_stackbuild_plugin.exceptions import (
-    KiwiStackBuildPluginStashNotFoundError,
     KiwiStackBuildPluginTargetDirExists
 )
 
@@ -109,7 +107,12 @@ class SystemStackbuildTask(CliTask):
                 )
             Path.create(image_root_dir)
             if self.command_args['--from-registry']:
-                # fetch stash from registry
+                log.info(
+                    'Fetching stash {0!r} from registry {1!r}'.format(
+                        stash_name,
+                        self.command_args['--from-registry']
+                    )
+                )
                 Command.run(
                     [
                         'podman', 'pull', os.path.join(
@@ -118,28 +121,22 @@ class SystemStackbuildTask(CliTask):
                         )
                     ]
                 )
-            else:
-                # fetch stash from local stash home
-                stash_file_name = os.path.join(
-                    StackBuildDefaults.get_stash_home(),
-                    stash_name, 'stash.tar'
-                )
-                if not os.path.isfile(stash_file_name):
-                    raise KiwiStackBuildPluginStashNotFoundError(
-                        f'stash: {stash_file_name!r} does not exist'
-                    )
-                Command.run(
-                    ['podman', 'load', '-i', stash_file_name]
-                )
+            log.info(f'Mounting stash: {stash_name!r}')
             stash_mount_point = Command.run(
                 ['podman', 'image', 'mount', stash_name]
             ).output.strip()
             root = DataSync(
                 stash_mount_point + os.sep, image_root_dir
             )
+            log.info(
+                'Syncing stash root {0!r} to image root {1!r}'.format(
+                    stash_mount_point, image_root_dir
+                )
+            )
             root.sync_data(
                 options=Defaults.get_sync_options()
             )
+            log.info(f'Umount stash: {stash_name!r}')
             Command.run(
                 ['podman', 'image', 'umount', stash_name]
             )
@@ -184,7 +181,7 @@ class SystemStackbuildTask(CliTask):
             kiwi_create_command.remove('--')
         # validate create command through docopt from the original
         # kiwi.tasks.system_create docopt information
-        log.info(
+        log.debug(
             'Validating kiwi_create_command_args:{0}    {1}'.format(
                 os.linesep, kiwi_create_command
             )
@@ -209,7 +206,7 @@ class SystemStackbuildTask(CliTask):
             kiwi_build_command.remove('--')
         # validate build command through docopt from the original
         # kiwi.tasks.system_build docopt information
-        log.info(
+        log.debug(
             'Validating kiwi_build_command_args:{0}    {1}'.format(
                 os.linesep, kiwi_build_command
             )
@@ -247,7 +244,7 @@ class SystemStackbuildTask(CliTask):
                 final_kiwi_command.append('--profile')
                 final_kiwi_command.append(profile)
         final_kiwi_command += kiwi_command
-        log.info(
+        log.debug(
             'Building with:{0}    {1}'.format(
                 os.linesep, final_kiwi_command
             )

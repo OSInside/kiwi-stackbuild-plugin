@@ -48,6 +48,7 @@ class TestSystemStashTask:
         self.task.process()
         stashes.display.assert_called_once_with()
 
+    @patch('kiwi_stackbuild_plugin.tasks.system_stash.Command.run')
     @patch('kiwi_stackbuild_plugin.tasks.system_stash.OCI.new')
     @patch('kiwi_stackbuild_plugin.tasks.system_stash.Privileges')
     @patch('kiwi_stackbuild_plugin.tasks.system_stash.Path')
@@ -55,7 +56,7 @@ class TestSystemStashTask:
     @patch('os.path.abspath')
     def test_process_build_initial_layer(
         self, mock_os_path_abspath, mock_os_path_exists,
-        mock_Path, mock_Privileges, mock_OCI_new
+        mock_Path, mock_Privileges, mock_OCI_new, mock_Command_run
     ):
         self._init_command_args()
         self.task.command_args['--root'] = '../data/image-root'
@@ -94,7 +95,14 @@ class TestSystemStashTask:
                 '../data/.config/kiwi_stash/tumbleweed/stash.tar',
                 'oci-archive', 'tumbleweed'
             )
+            mock_Command_run.assert_called_once_with(
+                [
+                    'podman', 'load', '-i',
+                    '../data/.config/kiwi_stash/tumbleweed/stash.tar'
+                ]
+            )
 
+    @patch('kiwi_stackbuild_plugin.tasks.system_stash.Command.run')
     @patch('kiwi_stackbuild_plugin.tasks.system_stash.OCI.new')
     @patch('kiwi_stackbuild_plugin.tasks.system_stash.Privileges')
     @patch('kiwi_stackbuild_plugin.tasks.system_stash.Path')
@@ -102,7 +110,7 @@ class TestSystemStashTask:
     @patch('os.path.abspath')
     def test_process_build_additional_layer(
         self, mock_os_path_abspath, mock_os_path_exists,
-        mock_Path, mock_Privileges, mock_OCI_new
+        mock_Path, mock_Privileges, mock_OCI_new, mock_Command_run
     ):
         self._init_command_args()
         self.task.command_args['--root'] = '../data/image-root'
@@ -115,4 +123,10 @@ class TestSystemStashTask:
             oci.import_container_image.assert_called_once_with(
                 'oci-archive:../data/.config/kiwi_stash/'
                 'tumbleweed/stash.tar:tumbleweed'
+            )
+            mock_Command_run.assert_called_once_with(
+                [
+                    'podman', 'load', '-i',
+                    '../data/.config/kiwi_stash/tumbleweed/stash.tar'
+                ]
             )

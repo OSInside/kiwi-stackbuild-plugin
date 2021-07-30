@@ -28,3 +28,9 @@ class KiwiStackBuildPluginTargetDirExists(KiwiError):
     """
     Exception raised if the image target directory already exists
     """
+
+
+class KiwiStackBuildPluginContainerNameInvalid(KiwiError):
+    """
+    Exception raised if the image name cannot be used as container name
+    """

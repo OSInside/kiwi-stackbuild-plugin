@@ -1,9 +1,13 @@
 import sys
+from pytest import raises
 from mock import (
     Mock, patch
 )
 
 from kiwi_stackbuild_plugin.tasks.system_stash import SystemStashTask
+from kiwi_stackbuild_plugin.exceptions import (
+    KiwiStackBuildPluginContainerNameInvalid
+)
 
 
 class TestSystemStashTask:
@@ -20,6 +24,7 @@ class TestSystemStashTask:
         self.task.command_args['stash'] = False
         self.task.command_args['--root'] = None
         self.task.command_args['--tag'] = None
+        self.task.command_args['--container-name'] = None
 
     @patch('kiwi_stackbuild_plugin.tasks.system_stash.Help')
     def test_process_help(self, mock_Help):
@@ -48,6 +53,13 @@ class TestSystemStashTask:
         self.task.process()
         stashes.display.assert_called_once_with()
 
+    @patch('kiwi_stackbuild_plugin.tasks.system_stash.Privileges')
+    def test_process_invalid_container_name(self, mock_Privileges):
+        self._init_command_args()
+        self.task.command_args['--root'] = '../data/image-root-invalid-name'
+        with raises(KiwiStackBuildPluginContainerNameInvalid):
+            self.task.process()
+
     @patch('kiwi_stackbuild_plugin.tasks.system_stash.Command.run')
     @patch('kiwi_stackbuild_plugin.tasks.system_stash.OCI.new')
     @patch('kiwi_stackbuild_plugin.tasks.system_stash.Privileges')
@@ -65,8 +77,8 @@ class TestSystemStashTask:
         mock_os_path_exists.return_value = False
         mock_os_path_abspath.return_value = 'absolute_root_dir_path'
         container_config = {
-            'container_name': 'stash.tar',
-            'container_tag': 'tumbleweed',
+            'container_name': 'tumbleweed',
+            'container_tag': 'latest',
             'entry_command': ['/bin/sh'],
             'labels': {
                 'io.osinside.kiwi.maintainer': 'Marcus Schaefer',
@@ -92,13 +104,13 @@ class TestSystemStashTask:
             oci.set_config.assert_called_once_with(container_config)
             oci.post_process.assert_called_once_with()
             oci.export_container_image.assert_called_once_with(
-                '../data/.config/kiwi_stash/tumbleweed/stash.tar',
-                'oci-archive', 'tumbleweed'
+                '../data/.config/kiwi_stash/tumbleweed/tumbleweed.tar',
+                'oci-archive', 'tumbleweed:latest'
             )
             mock_Command_run.assert_called_once_with(
                 [
                     'podman', 'load', '-i',
-                    '../data/.config/kiwi_stash/tumbleweed/stash.tar'
+                    '../data/.config/kiwi_stash/tumbleweed/tumbleweed.tar'
                 ]
             )
 
@@ -122,11 +134,11 @@ class TestSystemStashTask:
             self.task.process()
             oci.import_container_image.assert_called_once_with(
                 'oci-archive:../data/.config/kiwi_stash/'
-                'tumbleweed/stash.tar:tumbleweed'
+                'tumbleweed/tumbleweed.tar:tumbleweed:latest'
             )
             mock_Command_run.assert_called_once_with(
                 [
                     'podman', 'load', '-i',
-                    '../data/.config/kiwi_stash/tumbleweed/stash.tar'
+                    '../data/.config/kiwi_stash/tumbleweed/tumbleweed.tar'
                 ]
             )

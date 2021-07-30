@@ -16,6 +16,7 @@
 # along with kiwi-stackbuild.  If not, see <http://www.gnu.org/licenses/>
 #
 import os
+import re
 
 from kiwi.defaults import Defaults
 from typing import (
@@ -40,6 +41,18 @@ class StackBuildDefaults:
         """
         return os.path.join(
             os.environ.get('HOME') or '', '.config', 'kiwi_stash'
+        )
+
+    @staticmethod
+    def is_container_name_valid(name: str) -> bool:
+        """
+        Check container if name follows container naming rules
+
+        Container names must start or end with a letter or number,
+        and can contain only letters, numbers, and the dash (-) character.
+        """
+        return bool(
+            re.match(r'^[0-9a-zA-Z][0-9a-zA-Z\-]*[0-9a-zA-Z]$', name)
         )
 
     @staticmethod

@@ -11,6 +11,7 @@ SYNOPSIS
    kiwi-ng system stash -h | --help
    kiwi-ng system stash --root=<directory>
        [--tag=<name>]
+       [--container-name=<name>]
    kiwi-ng system stash --list
    kiwi-ng system stash help
 
@@ -33,6 +34,11 @@ OPTIONS
 
   The tag name for the container. By default 'latest'
   is used
+
+--container-name=<name>
+
+  The name of the container. By default
+  set to the image name of the stash
 
 --list
 

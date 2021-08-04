@@ -69,17 +69,19 @@ class SystemStashTask(CliTask):
             self.manual = Help()
             return self.manual.show('kiwi::system::stash')
 
-        Privileges.check_for_root_permissions()
-
         if self.command_args.get('--list') is True:
+            stash_dir = StackBuildDefaults.get_stash_home()
             stashes = DataOutput(
                 {
-                    StackBuildDefaults.get_stash_home():
-                        os.listdir(StackBuildDefaults.get_stash_home())
+                    stash_dir: os.listdir(
+                        stash_dir
+                    ) if os.path.isdir(stash_dir) else []
                 }
             )
             stashes.display()
             return
+
+        Privileges.check_for_root_permissions()
 
         log.info('Reading Image description')
         kiwi_description = os.path.join(

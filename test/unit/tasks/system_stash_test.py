@@ -92,27 +92,26 @@ class TestSystemStashTask:
                 'author': 'Marcus Schaefer'
             }
         }
-        with patch.dict('os.environ', {'HOME': '../data'}):
-            self.task.process()
-            mock_Privileges.check_for_root_permissions.assert_called_once_with()
-            oci.init_container.assert_called_once_with()
-            oci.unpack.assert_called_once_with()
-            oci.sync_rootfs.assert_called_once_with(
-                '../data/image-root', ['dev/*', 'sys/*', 'proc/*']
-            )
-            oci.repack.assert_called_once_with(container_config)
-            oci.set_config.assert_called_once_with(container_config)
-            oci.post_process.assert_called_once_with()
-            oci.export_container_image.assert_called_once_with(
-                '../data/.config/kiwi_stash/tumbleweed/tumbleweed.tar',
-                'oci-archive', 'tumbleweed:latest'
-            )
-            mock_Command_run.assert_called_once_with(
-                [
-                    'podman', 'load', '-i',
-                    '../data/.config/kiwi_stash/tumbleweed/tumbleweed.tar'
-                ]
-            )
+        self.task.process()
+        mock_Privileges.check_for_root_permissions.assert_called_once_with()
+        oci.init_container.assert_called_once_with()
+        oci.unpack.assert_called_once_with()
+        oci.sync_rootfs.assert_called_once_with(
+            '../data/image-root', ['dev/*', 'sys/*', 'proc/*']
+        )
+        oci.repack.assert_called_once_with(container_config)
+        oci.set_config.assert_called_once_with(container_config)
+        oci.post_process.assert_called_once_with()
+        oci.export_container_image.assert_called_once_with(
+            '/var/tmp/kiwi-stash/tumbleweed/tumbleweed.tar',
+            'oci-archive', 'tumbleweed:latest'
+        )
+        mock_Command_run.assert_called_once_with(
+            [
+                'podman', 'load', '-i',
+                '/var/tmp/kiwi-stash/tumbleweed/tumbleweed.tar'
+            ]
+        )
 
     @patch('kiwi_stackbuild_plugin.tasks.system_stash.Command.run')
     @patch('kiwi_stackbuild_plugin.tasks.system_stash.OCI.new')
@@ -130,15 +129,14 @@ class TestSystemStashTask:
         mock_OCI_new.return_value = oci
         mock_os_path_exists.return_value = True
         mock_os_path_abspath.return_value = 'absolute_root_dir_path'
-        with patch.dict('os.environ', {'HOME': '../data'}):
-            self.task.process()
-            oci.import_container_image.assert_called_once_with(
-                'oci-archive:../data/.config/kiwi_stash/'
-                'tumbleweed/tumbleweed.tar:tumbleweed:latest'
-            )
-            mock_Command_run.assert_called_once_with(
-                [
-                    'podman', 'load', '-i',
-                    '../data/.config/kiwi_stash/tumbleweed/tumbleweed.tar'
-                ]
-            )
+        self.task.process()
+        oci.import_container_image.assert_called_once_with(
+            'oci-archive:/var/tmp/kiwi-stash/'
+            'tumbleweed/tumbleweed.tar:tumbleweed:latest'
+        )
+        mock_Command_run.assert_called_once_with(
+            [
+                'podman', 'load', '-i',
+                '/var/tmp/kiwi-stash/tumbleweed/tumbleweed.tar'
+            ]
+        )

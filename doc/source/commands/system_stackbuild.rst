@@ -7,10 +7,10 @@ SYNOPSIS
 .. code:: bash
 
    kiwi-ng system stackbuild -h | --help
-   kiwi-ng system stackbuild --stash=<name> --description=<directory> --target-dir=<directory>
+   kiwi-ng system stackbuild --stash=<name>... --description=<directory> --target-dir=<directory>
        [--from-registry=<URI>]
        [-- <kiwi_build_command_args>...]
-   kiwi-ng system stackbuild --stash=<name> --target-dir=<directory>
+   kiwi-ng system stackbuild --stash=<name>... --target-dir=<directory>
        [--from-registry=<URI>]
        [-- <kiwi_create_command_args>...]
    kiwi-ng system stackbuild help
@@ -63,7 +63,8 @@ OPTIONS
 
 --stash=<name>
 
-  Name of the stash. See `system stash --list` for available stashes
+  Name of the stash. See `system stash --list` for available stashes.
+  Multiple stashes will be stacked together in the given order
 
 --from-registry=<URI>
 

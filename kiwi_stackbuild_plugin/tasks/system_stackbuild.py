@@ -17,10 +17,10 @@
 #
 """
 usage: kiwi-ng system stackbuild -h | --help
-       kiwi-ng system stackbuild --stash=<name> --description=<directory> --target-dir=<directory>
+       kiwi-ng system stackbuild --stash=<name>... --description=<directory> --target-dir=<directory>
            [--from-registry=<URI>]
            [-- <kiwi_build_command_args>...]
-       kiwi-ng system stackbuild --stash=<name> --target-dir=<directory>
+       kiwi-ng system stackbuild --stash=<name>... --target-dir=<directory>
            [--from-registry=<URI>]
            [-- <kiwi_create_command_args>...]
        kiwi-ng system stackbuild help
@@ -37,9 +37,10 @@ commands:
         show manual page for stackbuild command
 
 options:
-    --stash=<name>
+    --stash=<name>...
         Name of the stash container. See 'system stash --list'
-        for available stashes
+        for available stashes. Multiple stashes will be stacked
+        together in the given order
 
     --from-registry=<URI>
         Pull given stash container name from the provided
@@ -82,7 +83,8 @@ from kiwi.utils.sync import DataSync
 from kiwi.defaults import Defaults
 
 from kiwi_stackbuild_plugin.exceptions import (
-    KiwiStackBuildPluginTargetDirExists
+    KiwiStackBuildPluginTargetDirExists,
+    KiwiStackBuildPluginRootSyncFailed
 )
 
 log = logging.getLogger('kiwi')
@@ -97,7 +99,6 @@ class SystemStackbuildTask(CliTask):
         Privileges.check_for_root_permissions()
 
         if self.command_args.get('--stash'):
-            stash_name = self.command_args['--stash']
             image_root_dir = os.path.join(
                 self.command_args['--target-dir'], 'build', 'image-root'
             )
@@ -106,40 +107,48 @@ class SystemStackbuildTask(CliTask):
                     f'image root dir: {image_root_dir!r} already exists'
                 )
             Path.create(image_root_dir)
-            if self.command_args['--from-registry']:
-                log.info(
-                    'Fetching stash {0!r} from registry {1!r}'.format(
-                        stash_name,
-                        self.command_args['--from-registry']
-                    )
-                )
-                Command.run(
-                    [
-                        'podman', 'pull', os.path.join(
-                            self.command_args['--from-registry'],
-                            stash_name
+
+            for stash_name in self.command_args['--stash']:
+                if self.command_args['--from-registry']:
+                    log.info(
+                        'Fetching stash {0!r} from registry {1!r}'.format(
+                            stash_name,
+                            self.command_args['--from-registry']
                         )
-                    ]
-                )
-            log.info(f'Mounting stash: {stash_name!r}')
-            stash_mount_point = Command.run(
-                ['podman', 'image', 'mount', stash_name]
-            ).output.strip()
-            root = DataSync(
-                stash_mount_point + os.sep, image_root_dir
-            )
-            log.info(
-                'Syncing stash root {0!r} to image root {1!r}'.format(
-                    stash_mount_point, image_root_dir
-                )
-            )
-            root.sync_data(
-                options=Defaults.get_sync_options()
-            )
-            log.info(f'Umount stash: {stash_name!r}')
-            Command.run(
-                ['podman', 'image', 'umount', stash_name]
-            )
+                    )
+                    Command.run(
+                        [
+                            'podman', 'pull', os.path.join(
+                                self.command_args['--from-registry'],
+                                stash_name
+                            )
+                        ]
+                    )
+                try:
+                    log.info(f'Mounting stash: {stash_name!r}')
+                    stash_mount_point = Command.run(
+                        ['podman', 'image', 'mount', stash_name]
+                    ).output.strip()
+                    root = DataSync(
+                        stash_mount_point + os.sep, image_root_dir
+                    )
+                    log.info(
+                        'Syncing stash root {0!r} to image root {1!r}'.format(
+                            stash_mount_point, image_root_dir
+                        )
+                    )
+                    root.sync_data(
+                        options=Defaults.get_sync_options()
+                    )
+                except Exception as issue:
+                    raise KiwiStackBuildPluginRootSyncFailed(issue)
+                finally:
+                    log.info(f'Umount stash: {stash_name!r}')
+                    Command.run(
+                        ['podman', 'image', 'umount', '--force', stash_name],
+                        raise_on_error=False
+                    )
+
             if self.command_args.get('--description'):
                 with patch.object(
                     sys, 'argv', self._validate_kiwi_build_command(

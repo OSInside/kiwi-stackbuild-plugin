@@ -34,3 +34,10 @@ class KiwiStackBuildPluginContainerNameInvalid(KiwiError):
     """
     Exception raised if the image name cannot be used as container name
     """
+
+
+class KiwiStackBuildPluginRootSyncFailed(KiwiError):
+    """
+    Exception raised if the rsync process to sync the stash into
+    the root-tree failed
+    """

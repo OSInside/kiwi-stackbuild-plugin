@@ -113,8 +113,8 @@ class TestSystemStackbuildTask:
             call(['podman', 'image', 'mount', 'name']),
             call(
                 [
-                    'rsync', '-a', '-H', '-X', '-A',
-                    '--one-file-system', '--inplace',
+                    'rsync', '--archive', '--hard-links', '--xattrs',
+                    '--acls', '--one-file-system', '--inplace',
                     '/podman/mount/path/',
                     '/some/target-dir/build/image-root'
                 ]
@@ -166,8 +166,8 @@ class TestSystemStackbuildTask:
             call(['podman', 'image', 'mount', 'name']),
             call(
                 [
-                    'rsync', '-a', '-H', '-X', '-A',
-                    '--one-file-system', '--inplace',
+                    'rsync', '--archive', '--hard-links', '--xattrs',
+                    '--acls', '--one-file-system', '--inplace',
                     '/podman/mount/path/',
                     '/some/target-dir/build/image-root'
                 ]

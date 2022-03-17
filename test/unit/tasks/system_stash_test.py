@@ -73,11 +73,17 @@ class TestSystemStashTask:
         self, mock_os_path_abspath, mock_os_path_exists,
         mock_Path, mock_Privileges, mock_OCI_new, mock_Command_run
     ):
+        def os_path_exists(filename):
+            if filename == '/var/tmp/kiwi-stash/tumbleweed/tumbleweed.tar':
+                return False
+            else:
+                return True
+
         self._init_command_args()
         self.task.command_args['--root'] = '../data/image-root'
         oci = Mock()
         mock_OCI_new.return_value = oci
-        mock_os_path_exists.return_value = False
+        mock_os_path_exists.side_effect = os_path_exists
         mock_os_path_abspath.return_value = 'absolute_root_dir_path'
         container_config = {
             'container_name': 'tumbleweed',

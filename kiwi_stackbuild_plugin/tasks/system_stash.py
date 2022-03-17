@@ -128,7 +128,7 @@ class SystemStashTask(CliTask):
         )
         log.info('Initializing stash container')
         oci = OCI.new()
-        if os.path.exists(stash_container_file_name):
+        if os.path.isfile(stash_container_file_name):
             log.info('--> Adding new layer on existing stash')
             oci.import_container_image(
                 f'oci-archive:{stash_container_file_name}:'

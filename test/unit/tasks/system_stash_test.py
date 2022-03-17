@@ -67,24 +67,16 @@ class TestSystemStashTask:
     @patch('kiwi_stackbuild_plugin.tasks.system_stash.OCI.new')
     @patch('kiwi_stackbuild_plugin.tasks.system_stash.Privileges')
     @patch('kiwi_stackbuild_plugin.tasks.system_stash.Path')
-    @patch('os.path.exists')
-    @patch('os.path.abspath')
+    @patch('os.path.isfile')
     def test_process_build_initial_layer(
-        self, mock_os_path_abspath, mock_os_path_exists,
+        self, mock_os_path_isfile,
         mock_Path, mock_Privileges, mock_OCI_new, mock_Command_run
     ):
-        def os_path_exists(filename):
-            if filename == '/var/tmp/kiwi-stash/tumbleweed/tumbleweed.tar':
-                return False
-            else:
-                return True
-
         self._init_command_args()
         self.task.command_args['--root'] = '../data/image-root'
         oci = Mock()
         mock_OCI_new.return_value = oci
-        mock_os_path_exists.side_effect = os_path_exists
-        mock_os_path_abspath.return_value = 'absolute_root_dir_path'
+        mock_os_path_isfile.return_value = False
         container_config = {
             'container_name': 'tumbleweed',
             'container_tag': 'latest',
@@ -126,17 +118,17 @@ class TestSystemStashTask:
     @patch('kiwi_stackbuild_plugin.tasks.system_stash.OCI.new')
     @patch('kiwi_stackbuild_plugin.tasks.system_stash.Privileges')
     @patch('kiwi_stackbuild_plugin.tasks.system_stash.Path')
-    @patch('os.path.exists')
+    @patch('os.path.isfile')
     @patch('os.path.abspath')
     def test_process_build_additional_layer(
-        self, mock_os_path_abspath, mock_os_path_exists,
+        self, mock_os_path_abspath, mock_os_path_isfile,
         mock_Path, mock_Privileges, mock_OCI_new, mock_Command_run
     ):
         self._init_command_args()
         self.task.command_args['--root'] = '../data/image-root'
         oci = Mock()
         mock_OCI_new.return_value = oci
-        mock_os_path_exists.return_value = True
+        mock_os_path_isfile.return_value = True
         mock_os_path_abspath.return_value = 'absolute_root_dir_path'
         self.task.process()
         oci.import_container_image.assert_called_once_with(

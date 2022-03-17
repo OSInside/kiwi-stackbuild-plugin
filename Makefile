@@ -37,7 +37,7 @@ build: clean tox
 	mv setup.pye setup.py
 	# provide rpm source tarball
 	mv dist/kiwi_stackbuild_plugin-${version}.tar.gz \
-		dist/python-kiwi_stackbuild_plugin.tar.gz
+		dist/python-kiwi-stackbuild-plugin.tar.gz
 	# update rpm changelog using reference file
 	helper/update_changelog.py \
 		--since package/python-kiwi_stackbuild_plugin.changes \

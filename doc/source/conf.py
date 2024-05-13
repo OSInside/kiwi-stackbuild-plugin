@@ -73,7 +73,7 @@ todo_include_todos = True
 extlinks = {
     'issue': ('https://github.com/OSInside/kiwi-stackbuild-plugin/issues/%s', '#'),
     'pr': ('https://github.com/OSInside/kiwi-stackbuild-plugin/pull/%s', 'PR #'),
-    'ghkiwi': ('https://github.com/OSInside/kiwi-stackbuild-plugin/blob/master/%s', '')
+    'ghkiwi': ('https://github.com/OSInside/kiwi-stackbuild-plugin/blob/main/%s', '')
 }
 
 

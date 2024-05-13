@@ -3,7 +3,7 @@ from pytest import raises
 from mock import (
     Mock, patch
 )
-
+from tempfile import NamedTemporaryFile
 from kiwi_stackbuild_plugin.tasks.system_stash import SystemStashTask
 from kiwi_stackbuild_plugin.exceptions import (
     KiwiStackBuildPluginContainerNameInvalid
@@ -17,6 +17,7 @@ class TestSystemStashTask:
             '--root', 'some-root-dir'
         ]
         self.task = SystemStashTask()
+        self.tmpfile = NamedTemporaryFile()
 
     def setup_method(self, cls):
         self.setup()
@@ -120,10 +121,15 @@ class TestSystemStashTask:
     @patch('kiwi_stackbuild_plugin.tasks.system_stash.Path')
     @patch('os.path.isfile')
     @patch('os.path.abspath')
+    @patch('kiwi.utils.temporary.NamedTemporaryFile')
     def test_process_build_additional_layer(
-        self, mock_os_path_abspath, mock_os_path_isfile,
-        mock_Path, mock_Privileges, mock_OCI_new, mock_Command_run
+        self, mock_NamedTemporaryFile, mock_os_path_abspath,
+        mock_os_path_isfile, mock_Path, mock_Privileges, mock_OCI_new,
+        mock_Command_run
     ):
+        tempfile = Mock()
+        tempfile.name = self.tmpfile.name
+        mock_NamedTemporaryFile.return_value = tempfile
         self._init_command_args()
         self.task.command_args['--root'] = '../data/image-root'
         oci = Mock()

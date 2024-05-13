@@ -196,7 +196,7 @@ class SystemStackbuildTask(CliTask):
             )
         )
         validated_create_command = docopt(
-            doc=kiwi.tasks.system_create.__doc__,
+            kiwi.tasks.system_create.__doc__,
             argv=kiwi_create_command
         )
         # rebuild kiwi create command from validated docopt parser result
@@ -221,7 +221,7 @@ class SystemStackbuildTask(CliTask):
             )
         )
         validated_build_command = docopt(
-            doc=kiwi.tasks.system_build.__doc__,
+            kiwi.tasks.system_build.__doc__,
             argv=kiwi_build_command
         )
         # rebuild kiwi build command from validated docopt parser result

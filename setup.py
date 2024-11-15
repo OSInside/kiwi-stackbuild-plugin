@@ -26,7 +26,6 @@ config = {
     'license' : 'GPLv3+',
     'install_requires': [
         'docopt',
-        'mock',
         'kiwi>=9.23.0'
     ],
     'packages': ['kiwi_stackbuild_plugin'],

@@ -65,6 +65,7 @@ import sys
 import logging
 from mock import patch
 from docopt import docopt
+from tempfile import TemporaryDirectory
 from typing import (
     Dict, List
 )
@@ -82,9 +83,10 @@ from kiwi.path import Path
 from kiwi.utils.sync import DataSync
 from kiwi.defaults import Defaults
 
+from kiwi_stackbuild_plugin.xml_merge import XMLMerge
 from kiwi_stackbuild_plugin.exceptions import (
     KiwiStackBuildPluginTargetDirExists,
-    KiwiStackBuildPluginRootSyncFailed
+    KiwiStackBuildPluginRootSyncFailed,
 )
 
 log = logging.getLogger('kiwi')
@@ -150,34 +152,57 @@ class SystemStackbuildTask(CliTask):
                     )
 
             if self.command_args.get('--description'):
-                with patch.object(
-                    sys, 'argv', self._validate_kiwi_build_command(
-                        [
-                            'system', 'build',
-                            '--description', self.command_args['--description'],
-                            '--target-dir', self.command_args['--target-dir'],
-                            '--allow-existing-root'
-                        ]
-                    )
-                ):
-                    kiwi_task = SystemBuildTask(
-                        should_perform_task_setup=False
-                    )
-            else:
-                with patch.object(
-                    sys, 'argv', self._validate_kiwi_create_command(
-                        [
-                            'system', 'create',
-                            '--root', image_root_dir,
-                            '--target-dir', self.command_args['--target-dir']
-                        ]
-                    )
-                ):
-                    kiwi_task = SystemCreateTask(
-                        should_perform_task_setup=False
-                    )
+                merger = XMLMerge(self.command_args['--description'])
+                if merger.is_stackbuild_description():
+                    merger.validate_schema()
+                    with TemporaryDirectory(
+                        prefix='kiwi_description.'
+                    ) as temp_desc:
+                        merger.merge_description(
+                            f'{image_root_dir}/image', temp_desc
+                        )
+                        self._kiwi_build_task(
+                            temp_desc, self.command_args['--target-dir']
+                        ).process()
 
-            kiwi_task.process()
+                else:
+                    self._kiwi_build_task(
+                        self.command_args['--description'],
+                        self.command_args['--target-dir']
+                    ).process()
+            else:
+                self._kiwi_create_task(
+                    image_root_dir, self.command_args['--target-dir']
+                ).process()
+
+    def _kiwi_build_task(self, description: str, target_dir: str) -> SystemBuildTask:
+        with patch.object(
+            sys, 'argv', self._validate_kiwi_build_command(
+                [
+                    'system', 'build',
+                    '--description', description,
+                    '--target-dir', target_dir,
+                    '--allow-existing-root'
+                ]
+            )
+        ):
+            return SystemBuildTask(
+                should_perform_task_setup=False
+            )
+
+    def _kiwi_create_task(self, root_dir: str, target_dir: str) -> SystemCreateTask:
+        with patch.object(
+            sys, 'argv', self._validate_kiwi_create_command(
+                [
+                    'system', 'create',
+                    '--root', root_dir,
+                    '--target-dir', target_dir
+                ]
+            )
+        ):
+            return SystemCreateTask(
+                should_perform_task_setup=False
+            )
 
     def _validate_kiwi_create_command(
         self, kiwi_create_command: List[str]

@@ -25,6 +25,14 @@ install:
 	install -m 644 README.rst \
 		${buildroot}${docdir}/python-kiwi_stackbuild_plugin/README
 
+kiwi_stackbuild_plugin/schema.rng: kiwi_stackbuild_plugin/schema.rnc
+	# whenever the schema is changed this target will convert
+	# the short form of the RelaxNG schema to the format used
+	# in code and auto generates the python data structures
+	@type -p trang &>/dev/null || \
+		(echo "ERROR: trang not found in path: $(PATH)"; exit 1)
+	trang -I rnc -O rng kiwi_stackbuild_plugin/schema.rnc kiwi_stackbuild_plugin/schema.rng
+
 build: clean tox
 	# create setup.py variant for rpm build.
 	# delete module versions from setup.py for building an rpm

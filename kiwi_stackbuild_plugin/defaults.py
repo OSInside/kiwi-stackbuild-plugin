@@ -16,6 +16,8 @@
 # along with kiwi-stackbuild.  If not, see <http://www.gnu.org/licenses/>
 #
 import re
+import importlib
+from importlib.resources import as_file
 
 from kiwi.defaults import Defaults
 from typing import (
@@ -95,3 +97,31 @@ class StackBuildDefaults:
                 'author': maintainer
             }
         }
+
+    @staticmethod
+    def project_file(filename):
+        """
+        Provides the python module base directory search path
+
+        The method uses the importlib.resources.path method to identify
+        files and directories from the application
+
+        :param string filename: relative project file
+
+        :return: absolute file path name
+
+        :rtype: str
+        """
+        with as_file(importlib.resources.files('kiwi_stackbuild_plugin')) as path:
+            return f'{path}/{filename}'
+
+    @staticmethod
+    def get_schema_file():
+        """
+        Provides file path to kiwi RelaxNG schema
+
+        :return: file path
+
+        :rtype: str
+        """
+        return StackBuildDefaults.project_file('schema.rng')

@@ -89,7 +89,9 @@ class SystemStashTask(CliTask):
         )
         description = XMLDescription(kiwi_description)
         xml_state = XMLState(
-            xml_data=description.load()
+            description.load(),
+            self.global_args['--profile'],
+            self.global_args['--type']
         )
         contact_info = xml_state.get_description_section()
         image_name = self.command_args['--container-name'] or \

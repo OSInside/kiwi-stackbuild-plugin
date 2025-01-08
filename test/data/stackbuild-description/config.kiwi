@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<image name="tumbleweed" schemaversion="0.1" stackbuild="true" displayname="test name" id="ID">
+    <description type="system">
+        <author>David Cassany</author>
+        <contact>dcassany@suse.com</contact>
+        <specification>Some variation of an stashed image</specification>
+    </description>
+    <profiles>
+        <profile name="Live" description="Live image"/>
+    </profiles>
+    <preferences profiles="Live">
+        <keytable>us</keytable>
+        <locale>en_US</locale>
+        <packagemanager>zypper</packagemanager>
+        <timezone>Europe/Berlin</timezone>
+        <version>1.99.1</version>
+        <type image="iso"/>
+    </preferences>
+    <preferences>
+        <keytable>us</keytable>
+        <locale>en_US</locale>
+        <packagemanager>zypper</packagemanager>
+        <timezone>Europe/Berlin</timezone>
+        <version>1.99.1</version>
+        <type image="tbz"/>
+        <type image="oem"/>
+        <showlicense>MY_LICENSE</showlicense>
+        <release-version>1.1</release-version>
+    </preferences>
+    <users>
+        <user groups="root" home="/root" name="root" password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0"/>
+        <user groups="users" home="/home" name="newuser" password="$1$oQ2X7Mgu$UiWB4C9jfFvUKygpvT9WY0"/>
+    </users>
+    <users profiles="Live">
+        <user groups="users" home="/home" name="liveuser" password="$1$oQ2X7Mgu$UiWB4C9jfFvUKygpvT9WY0"/>
+    </users>
+    <packages type="image">
+        <package name="cowsay"/>
+    </packages>
+</image>

@@ -41,3 +41,10 @@ class KiwiStackBuildPluginRootSyncFailed(KiwiError):
     Exception raised if the rsync process to sync the stash into
     the root-tree failed
     """
+
+
+class KiwiStackBuildPluginSchemaValidationFailed(KiwiError):
+    """
+    Exception raised if the provided XML description is not compliant with
+    the stack build image schema
+    """

@@ -1,0 +1,56 @@
+#================
+# FILE          : schema.rnc
+#****************
+# PROJECT       : KIWI - Stack Build Plugin
+# COPYRIGHT     : (c) 2021 SUSE LINUX Products GmbH
+#               :
+# AUTHOR        : David Cassany <dcassany@suse.com>
+#               :
+# BELONGS TO    : Operating System images
+#               :
+# DESCRIPTION   : This is the RELAX NG Schema for KIWI Rebuild Images
+#               : plugin configuration files. The schema is maintained
+#               : in the relax compact syntax. Any changes should
+#               : made in !! *** schema.rnc *** !!
+#               :
+#               :
+# STATUS        : Development
+#****************
+
+namespace rng = "http://relaxng.org/ns/structure/1.0"
+
+# The real include value is computed and replaced in memory at runtime
+# to match the actual KIWI schema of the KIWI module being loaded
+include "kiwi-fake-schema.rnc" {
+    k.image.schemaversion.attribute =
+        ## The allowed Schema version (fixed value)
+        attribute schemaversion { "0.1" }
+
+    k.image.attlist = k.image.name.attribute
+        & k.image.stackbuild.attribute
+        & k.image.displayname.attribute?
+        & k.image.id?
+        & k.image.schemaversion.attribute
+        & ( k.image.noNamespaceSchemaLocation.attribute?
+            | k.image.schemaLocation.attribute? )?
+
+    k.image =
+        ## The root element of the configuration file
+        element image {
+            k.image.attlist &
+            k.description? &
+            k.preferences* &
+            k.profiles? &
+            k.users* &
+            k.drivers* &
+            k.strip* &
+            k.repository* &
+            k.packages* 
+        }
+}
+
+div{
+    k.image.stackbuild.attribute =
+        ## Identifies description as a stackbuild XML
+        attribute stackbuild { "true" }
+}

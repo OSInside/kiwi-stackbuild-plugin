@@ -1,0 +1,9 @@
+#==========================================
+# Fake rnc file used only to convert
+# stackbuild schema.rnc file to schema.rng
+# without requiring the actual KIWI schema
+# file
+#
+start =
+    ## The start pattern of an image
+    k.image

@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ================
+  FILE          : schema.rnc
+  ****************
+  PROJECT       : KIWI - Stack Build Plugin
+  COPYRIGHT     : (c) 2021 SUSE LINUX Products GmbH
+                :
+  AUTHOR        : David Cassany <dcassany@suse.com>
+                :
+  BELONGS TO    : Operating System images
+                :
+  DESCRIPTION   : This is the RELAX NG Schema for KIWI Rebuild Images
+                : plugin configuration files. The schema is maintained
+                : in the relax compact syntax. Any changes should
+                : made in !! *** schema.rnc *** !!
+                :
+                :
+  STATUS        : Development
+  ****************
+-->
+<grammar xmlns:a="http://relaxng.org/ns/compatibility/annotations/1.0" xmlns:rng="http://relaxng.org/ns/structure/1.0" xmlns="http://relaxng.org/ns/structure/1.0">
+  <!--
+    The real include value is computed and replaced in memory at runtime
+    to match the actual KIWI schema of the KIWI module being loaded
+  -->
+  <include href="kiwi-fake-schema.rng">
+    <define name="k.image.schemaversion.attribute">
+      <attribute name="schemaversion">
+        <a:documentation>The allowed Schema version (fixed value)</a:documentation>
+        <value>0.1</value>
+      </attribute>
+    </define>
+    <define name="k.image.attlist">
+      <interleave>
+        <ref name="k.image.name.attribute"/>
+        <ref name="k.image.stackbuild.attribute"/>
+        <optional>
+          <ref name="k.image.displayname.attribute"/>
+        </optional>
+        <optional>
+          <ref name="k.image.id"/>
+        </optional>
+        <ref name="k.image.schemaversion.attribute"/>
+        <optional>
+          <choice>
+            <optional>
+              <ref name="k.image.noNamespaceSchemaLocation.attribute"/>
+            </optional>
+            <optional>
+              <ref name="k.image.schemaLocation.attribute"/>
+            </optional>
+          </choice>
+        </optional>
+      </interleave>
+    </define>
+    <define name="k.image">
+      <element name="image">
+        <a:documentation>The root element of the configuration file</a:documentation>
+        <interleave>
+          <ref name="k.image.attlist"/>
+          <optional>
+            <ref name="k.description"/>
+          </optional>
+          <zeroOrMore>
+            <ref name="k.preferences"/>
+          </zeroOrMore>
+          <optional>
+            <ref name="k.profiles"/>
+          </optional>
+          <zeroOrMore>
+            <ref name="k.users"/>
+          </zeroOrMore>
+          <zeroOrMore>
+            <ref name="k.drivers"/>
+          </zeroOrMore>
+          <zeroOrMore>
+            <ref name="k.strip"/>
+          </zeroOrMore>
+          <zeroOrMore>
+            <ref name="k.repository"/>
+          </zeroOrMore>
+          <zeroOrMore>
+            <ref name="k.packages"/>
+          </zeroOrMore>
+        </interleave>
+      </element>
+    </define>
+  </include>
+  <div>
+    <define name="k.image.stackbuild.attribute">
+      <attribute name="stackbuild">
+        <a:documentation>Identifies description as a stackbuild XML</a:documentation>
+        <value>true</value>
+      </attribute>
+    </define>
+  </div>
+</grammar>

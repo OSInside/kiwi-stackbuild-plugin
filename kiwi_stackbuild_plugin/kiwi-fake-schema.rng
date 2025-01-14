@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<grammar xmlns:a="http://relaxng.org/ns/compatibility/annotations/1.0" xmlns="http://relaxng.org/ns/structure/1.0">
+  <!--
+    ==========================================
+    Fake rnc file used only to convert
+    stackbuild schema.rnc file to schema.rng
+    without requiring the actual KIWI schema
+    file
+    
+  -->
+  <start>
+    <ref name="k.image">
+      <a:documentation>The start pattern of an image</a:documentation>
+    </ref>
+  </start>
+</grammar>

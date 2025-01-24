@@ -63,7 +63,7 @@ options:
 import os
 import sys
 import logging
-from mock import patch
+from unittest.mock import patch
 from docopt import docopt
 from typing import (
     Dict, List

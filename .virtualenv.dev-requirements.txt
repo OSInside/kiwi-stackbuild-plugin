@@ -14,9 +14,6 @@ pytest
 pytest-cov
 pytest-xdist
 
-# Rolling backport of unittest.mock for all Pythons
-mock
-
 # Version-bump your software with a single command!
 bumpversion
 
@@ -35,4 +32,3 @@ twine
 
 # static type checking
 mypy
-types-mock

@@ -1,0 +1,87 @@
+[tool.poetry]
+name = "kiwi_stackbuild_plugin"
+version = "1.0.10"
+description = "KIWI - Stack Build Plugin"
+license = "GPL-3.0-or-later"
+readme = "README.rst"
+homepage = "https://osinside.github.io/kiwi/"
+documentation = "https://osinside.github.io/kiwi/plugins/stackbuild.html"
+repository = "https://github.com/OSInside/kiwi-stackbuild-plugin"
+
+authors = [
+   "Marcus Schäfer <marcus.schaefer@suse.com>",
+   "David Cassany Viladomat <dcassany@suse.com>",
+]
+maintainers = [
+   "Marcus Schäfer <marcus.schaefer@suse.com>",
+   "David Cassany Viladomat <dcassany@suse.com>",
+   "Neal Gompa <neal@gompa.dev>",
+]
+
+packages = [
+   { include = "kiwi_stackbuild_plugin"},
+]
+
+include = [
+   { path = ".bumpversion.cfg", format = "sdist" },
+   { path = ".coverage*", format = "sdist" },
+   { path = "setup.cfg", format = "sdist" },
+   { path = "doc/source", format = "sdist" },
+   { path = "doc/Makefile", format = "sdist" },
+   { path = "helper", format = "sdist" },
+   { path = "Makefile", format = "sdist" },
+   { path = "package", format = "sdist" },
+   { path = "test", format = "sdist" },
+]
+
+classifiers = [
+   # classifier: http://pypi.python.org/pypi?%3Aaction=list_classifiers
+   "Development Status :: 5 - Production/Stable",
+   "Intended Audience :: Developers",
+   "Operating System :: POSIX :: Linux",
+   "Topic :: System :: Operating System",
+]
+
+[tool.poetry.urls]
+"Bug Tracker" = "https://github.com/OSInside/kiwi-stackbuild-plugin/issues"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+kiwi = ">=9.21.21"
+docopt-ng = ">=0.9.0"
+
+[tool.poetry.plugins]
+[tool.poetry.plugins."kiwi.tasks"]
+system_stackbuild = "kiwi_stackbuild_plugin.tasks.system_stackbuild"
+system_stash = "kiwi_stackbuild_plugin.tasks.system_stash"
+
+[tool.poetry.group.test]
+[tool.poetry.group.test.dependencies]
+# python unit testing framework
+pytest = ">=6.2.0"
+pytest-cov = "*"
+pytest-xdist = "*"
+# type checking
+mypy = ">=0.971"
+
+[tool.poetry.group.style]
+[tool.poetry.group.style.dependencies]
+flake8 = ">=4.0.0"
+
+[tool.poetry.group.docs]
+[tool.poetry.group.docs.dependencies]
+sphinx = ">=5.0.0"
+sphinx_rtd_theme = "*"
+sphinxcontrib-spelling = "*"
+pyenchant = "*"
+travis-sphinx = "*"
+ghp-import = "*"
+
+[tool.poetry.group.development]
+[tool.poetry.group.development.dependencies]
+python-dateutil = "*"
+bumpversion = "*"
+
+[build-system]
+requires = ["poetry-core>=1.2.0"]
+build-backend = "poetry.core.masonry.api"

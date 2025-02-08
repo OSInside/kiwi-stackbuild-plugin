@@ -1,8 +1,0 @@
-# After activation of the env, install it with:
-# $ pip install -r requirements.txt
-
-# Shell interface for docopt, the command-line interface description language
-docopt
-
-# kiwi
-kiwi

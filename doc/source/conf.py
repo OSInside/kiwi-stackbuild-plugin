@@ -20,7 +20,6 @@ sys.path.insert(0, _path)
 extensions = [
     'sphinx.ext.extlinks',
     'sphinx.ext.viewcode',
-    'sphinx.ext.intersphinx'
 ]
 
 # Add any paths that contain templates here, relative to this directory.

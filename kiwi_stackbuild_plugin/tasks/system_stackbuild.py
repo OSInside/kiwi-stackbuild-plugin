@@ -182,23 +182,28 @@ class SystemStackbuildTask(CliTask):
     def _validate_kiwi_create_command(
         self, kiwi_create_command: List[str]
     ) -> List[str]:
-        # construct create command from given command line
-        kiwi_create_command += self.command_args.get(
-            '<kiwi_create_command_args>'
-        )
-        if '--' in kiwi_create_command:
-            kiwi_create_command.remove('--')
-        # validate create command through docopt from the original
-        # kiwi.tasks.system_create docopt information
-        log.debug(
-            'Validating kiwi_create_command_args:{0}    {1}'.format(
-                os.linesep, kiwi_create_command
+        if self.command_args.get('<kiwi_create_command_args>'):
+            # construct create command from docopt command line
+            kiwi_create_command += self.command_args.get(
+                '<kiwi_create_command_args>'
             )
-        )
-        validated_create_command = docopt(
-            kiwi.tasks.system_create.__doc__,
-            argv=kiwi_create_command
-        )
+            if '--' in kiwi_create_command:
+                kiwi_create_command.remove('--')
+            # validate create command through docopt from the original
+            # kiwi.tasks.system_create docopt information
+            log.debug(
+                'Validating kiwi_create_command_args:{0}    {1}'.format(
+                    os.linesep, kiwi_create_command
+                )
+            )
+            validated_create_command = docopt(
+                kiwi.tasks.system_create.__doc__,
+                argv=kiwi_create_command
+            )
+        else:
+            validated_create_command = \
+                self.command_args.get('system_build_or_create')
+
         # rebuild kiwi create command from validated docopt parser result
         return self._rebuild_kiwi_command(
             validated_create_command, 'create'
@@ -207,24 +212,29 @@ class SystemStackbuildTask(CliTask):
     def _validate_kiwi_build_command(
         self, kiwi_build_command: List[str]
     ) -> List[str]:
-        # construct build command from given command line
-        kiwi_build_command += self.command_args.get(
-            '<kiwi_build_command_args>'
-        )
-        if '--' in kiwi_build_command:
-            kiwi_build_command.remove('--')
-        # validate build command through docopt from the original
-        # kiwi.tasks.system_build docopt information
-        log.debug(
-            'Validating kiwi_build_command_args:{0}    {1}'.format(
-                os.linesep, kiwi_build_command
+        if self.command_args.get('<kiwi_build_command_args>'):
+            # construct build command from given command line
+            kiwi_build_command += self.command_args.get(
+                '<kiwi_build_command_args>'
             )
-        )
-        validated_build_command = docopt(
-            kiwi.tasks.system_build.__doc__,
-            argv=kiwi_build_command
-        )
-        # rebuild kiwi build command from validated docopt parser result
+            if '--' in kiwi_build_command:
+                kiwi_build_command.remove('--')
+            # validate build command through docopt from the original
+            # kiwi.tasks.system_build docopt information
+            log.debug(
+                'Validating kiwi_build_command_args:{0}    {1}'.format(
+                    os.linesep, kiwi_build_command
+                )
+            )
+            validated_build_command = docopt(
+                kiwi.tasks.system_build.__doc__,
+                argv=kiwi_build_command
+            )
+        else:
+            validated_build_command = \
+                self.command_args.get('system_build_or_create')
+
+        # rebuild kiwi build command from validated parser result
         return self._rebuild_kiwi_command(
             validated_build_command, 'build'
         )

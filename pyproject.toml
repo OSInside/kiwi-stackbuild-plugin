@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "kiwi_stackbuild_plugin"
-version = "1.0.12"
+version = "1.0.13"
 description = "KIWI - Stack Build Plugin"
 license = "GPL-3.0-or-later"
 readme = "README.rst"

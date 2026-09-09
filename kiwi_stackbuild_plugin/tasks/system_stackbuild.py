@@ -65,9 +65,7 @@ import sys
 import logging
 from unittest.mock import patch
 from docopt import docopt
-from typing import (
-    Dict, List
-)
+from typing import List
 
 import kiwi.tasks.system_build
 import kiwi.tasks.system_create
@@ -182,7 +180,7 @@ class SystemStackbuildTask(CliTask):
     def _validate_kiwi_create_command(
         self, kiwi_create_command: List[str]
     ) -> List[str]:
-        if self.command_args.get('<kiwi_create_command_args>'):
+        if self.command_args.get('<kiwi_create_command_args>'):  # pragma: nocover
             # construct create command from docopt command line
             kiwi_create_command += self.command_args.get(
                 '<kiwi_create_command_args>'
@@ -200,19 +198,44 @@ class SystemStackbuildTask(CliTask):
                 kiwi.tasks.system_create.__doc__,
                 argv=kiwi_create_command
             )
+            kiwi_command = [
+                'system', 'create'
+            ]
+            for option, value in validated_create_command.items():
+                if option.startswith('-') and value:
+                    if isinstance(value, bool):
+                        kiwi_command.append(option)
+                    elif isinstance(value, str):
+                        kiwi_command.extend([option, value])
+                    elif isinstance(value, list):
+                        for element in value:
+                            kiwi_command.extend([option, element])
         else:
-            validated_create_command = \
-                self.command_args.get('system_build_or_create')
+            kiwi_command = [
+                'system', 'create'
+            ] + self.command_args.get('system_build_or_create')
 
-        # rebuild kiwi create command from validated docopt parser result
-        return self._rebuild_kiwi_command(
-            validated_create_command, 'create'
+        # rebuild kiwi create command
+        final_kiwi_command = ['kiwi-ng']
+        if self.global_args.get('--type'):
+            final_kiwi_command.append('--type')
+            final_kiwi_command.append(self.global_args.get('--type'))
+        if self.global_args.get('--profile'):
+            for profile in sorted(set(self.global_args.get('--profile'))):
+                final_kiwi_command.append('--profile')
+                final_kiwi_command.append(profile)
+        final_kiwi_command += kiwi_command
+        log.debug(
+            'Building with:{0}    {1}'.format(
+                os.linesep, final_kiwi_command
+            )
         )
+        return final_kiwi_command
 
     def _validate_kiwi_build_command(
         self, kiwi_build_command: List[str]
     ) -> List[str]:
-        if self.command_args.get('<kiwi_build_command_args>'):
+        if self.command_args.get('<kiwi_build_command_args>'):  # pragma: nocover
             # construct build command from given command line
             kiwi_build_command += self.command_args.get(
                 '<kiwi_build_command_args>'
@@ -230,30 +253,24 @@ class SystemStackbuildTask(CliTask):
                 kiwi.tasks.system_build.__doc__,
                 argv=kiwi_build_command
             )
+            kiwi_command = [
+                'system', 'build'
+            ]
+            for option, value in validated_build_command.items():
+                if option.startswith('-') and value:
+                    if isinstance(value, bool):
+                        kiwi_command.append(option)
+                    elif isinstance(value, str):
+                        kiwi_command.extend([option, value])
+                    elif isinstance(value, list):
+                        for element in value:
+                            kiwi_command.extend([option, element])
         else:
-            validated_build_command = \
-                self.command_args.get('system_build_or_create')
+            kiwi_command = [
+                'system', 'build'
+            ] + self.command_args.get('system_build_or_create')
 
-        # rebuild kiwi build command from validated parser result
-        return self._rebuild_kiwi_command(
-            validated_build_command, 'build'
-        )
-
-    def _rebuild_kiwi_command(
-        self, validated_options_dict: Dict, command: str
-    ) -> List[str]:
-        kiwi_command = [
-            'system', command
-        ]
-        for option, value in validated_options_dict.items():
-            if option.startswith('-') and value:
-                if isinstance(value, bool):
-                    kiwi_command.append(option)
-                elif isinstance(value, str):
-                    kiwi_command.extend([option, value])
-                elif isinstance(value, list):
-                    for element in value:
-                        kiwi_command.extend([option, element])
+        # rebuild kiwi build command
         final_kiwi_command = ['kiwi-ng']
         if self.global_args.get('--type'):
             final_kiwi_command.append('--type')
